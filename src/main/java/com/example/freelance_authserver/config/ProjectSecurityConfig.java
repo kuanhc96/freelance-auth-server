@@ -4,6 +4,8 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
@@ -27,6 +29,8 @@ import org.springframework.security.oauth2.server.authorization.config.annotatio
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -87,20 +91,34 @@ public class ProjectSecurityConfig {
 
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
+		// the client_credentials client will be used for integration tests
 		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("oidc-client")
+				.clientId("freelance-integration-test-client")
 				.clientSecret("{noop}secret")
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("http://127.0.0.1:8080/login/oauth2/code/oidc-client")
-				.postLogoutRedirectUri("http://127.0.0.1:8080/")
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 				.scope(OidcScopes.OPENID)
-				.scope(OidcScopes.PROFILE)
-				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+				.tokenSettings(
+						TokenSettings.builder()
+								.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
+								.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+							.build()
+				)
 				.build();
 
-		return new InMemoryRegisteredClientRepository(oidcClient);
+		RegisteredClient authCodeClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("auth-code-client")
+				.clientSecret("{noop}secret1")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.redirectUri("http://localhost:8080/")
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of(OidcScopes.OPENID)))
+				.tokenSettings(TokenSettings.builder().accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
+						.refreshTokenTimeToLive(Duration.ofHours(8)).reuseRefreshTokens(false)
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED).build()).build();
+
+		return new InMemoryRegisteredClientRepository(oidcClient, authCodeClient);
 	}
 
 	@Bean
