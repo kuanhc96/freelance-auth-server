@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
@@ -94,7 +95,8 @@ public class ProjectSecurityConfig {
 				.clientSecret("{noop}secret")
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-				.scope(OidcScopes.OPENID)
+//				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
+				.scope("INTEGRATION_TEST")
 				.tokenSettings(TokenSettings.builder()
 						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
 						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
