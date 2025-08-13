@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -65,7 +68,7 @@ public class ProjectSecurityConfig {
 				// authorization endpoint
 				.exceptionHandling((exceptions) -> exceptions
 						.defaultAuthenticationEntryPointFor(
-								new LoginUrlAuthenticationEntryPoint("/login"),
+								new LoginUrlAuthenticationEntryPoint("http://localhost:8080/login"),
 								new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 						)
 				);
@@ -103,7 +106,41 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient);
+		RegisteredClient feClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("fe-client")
+				.clientSecret("{noop}secret1")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.redirectUri("http://localhost:8080/")
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of("FREELANCE_FE", "INSTRUCTOR", "STUDENT")))
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenTimeToLive(Duration.ofMinutes(10))
+						.refreshTokenTimeToLive(Duration.ofHours(8))
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.reuseRefreshTokens(false)
+						.build())
+				.build();
+
+		RegisteredClient pkceFeClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("fe-public-client")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.redirectUri("http://localhost:8080/")
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of("FREELANCE_FE", "INSTRUCTOR", "STUDENT")))
+				.clientSettings(ClientSettings.builder()
+						.requireProofKey(true)
+						.build())
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenTimeToLive(Duration.ofMinutes(10))
+						.refreshTokenTimeToLive(Duration.ofHours(8))
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.reuseRefreshTokens(false)
+						.build())
+				.build();
+
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient);
 	}
 
 	@Bean
@@ -140,5 +177,10 @@ public class ProjectSecurityConfig {
 	@Bean
 	public AuthorizationServerSettings authorizationServerSettings() {
 		return AuthorizationServerSettings.builder().build();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 	}
 }
