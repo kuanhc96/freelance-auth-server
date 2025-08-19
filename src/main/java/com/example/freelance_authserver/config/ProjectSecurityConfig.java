@@ -99,34 +99,31 @@ public class ProjectSecurityConfig {
 								.requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
 								.anyRequest().authenticated()
 				)
-//				.cors(corsConfig ->
-//						corsConfig.configurationSource(new CorsConfigurationSource() {
-//					@Override
-//					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-//						CorsConfiguration config = new CorsConfiguration();
-//						config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
-//						config.setAllowedMethods(Collections.singletonList("*"));
-//						config.setAllowCredentials(true);
-//						config.setAllowedHeaders(Collections.singletonList("*"));
-//						config.setMaxAge(3600L);
-//						return config;
-//					}
-//				})
-//				)
-				.csrf(csrf -> csrf.disable()
-//						csrfConfig -> csrfConfig
-//						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-//						.ignoringRequestMatchers("/oauth2/token", "/oauth2/authorize") // Disable CSRF protection on the OAuth2 endpoints
-//						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+				.cors(corsConfig ->
+						corsConfig.configurationSource(new CorsConfigurationSource() {
+					@Override
+					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+						CorsConfiguration config = new CorsConfiguration();
+						config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+						config.setAllowedMethods(Collections.singletonList("*"));
+						config.setAllowCredentials(true);
+						config.setAllowedHeaders(Collections.singletonList("*"));
+						config.setMaxAge(3600L);
+						return config;
+					}
+				})
+				)
+				.csrf(csrf -> csrf
+						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
 						.loginPage("/login")
-//						.loginProcessingUrl("/login")
 //						.defaultSuccessUrl("/")
 								.authenticationDetailsSource(detailsSource)
 //						.permitAll()
 				);
-//		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
+		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
 		return http.build();
 	}
