@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -57,6 +59,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
+import com.example.freelance_authserver.enums.UserRole;
 import com.example.freelance_authserver.filter.CsrfCookieFilter;
 import com.example.freelance_authserver.service.UserDetailsService;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -243,14 +246,25 @@ public class ProjectSecurityConfig {
 	@Bean
 	public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
 		return (context) -> {
-			if (context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
-				var principal = context.getPrincipal();
+			var principal = context.getPrincipal();
+			OAuth2TokenType tokenType = context.getTokenType();
+			if (tokenType.equals(OAuth2TokenType.ACCESS_TOKEN)) {
 				Set<String> roles = principal.getAuthorities().stream()
-						.map(GrantedAuthority::getAuthority)
+						.map(role -> "ROLE_" + role.getAuthority())
 						.collect(Collectors.toSet());
 				context.getClaims().claims((claims) -> {
 					claims.put("roles", roles);
 				});
+			} else if (tokenType.equals(new OAuth2TokenType(OidcParameterNames.ID_TOKEN))) {
+				UserRole role = principal.getAuthorities().stream()
+						.map(GrantedAuthority::getAuthority)
+						.map(UserRole::valueOf)
+						.findFirst()
+						.orElseThrow(() -> new BadCredentialsException("Invalid role")); // Default role if not found
+				context.getClaims().claims((claims) -> {
+					claims.put("role", role);
+				});
+
 			}
 		};
 	}

@@ -32,7 +32,7 @@ public class EmailPasswordRoleAuthenticationProvider implements AuthenticationPr
 		UserRole role = details.getRole();
 		FreelanceAppUserDetails userDetails = (FreelanceAppUserDetails) userDetailsService.loadUserByEmailAndRole(email, role);
 		if (passwordEncoder.matches(password, userDetails.getPassword())) {
-			return new UsernamePasswordAuthenticationToken(email, password, List.of(new SimpleGrantedAuthority("ROLE_" + role.name())));
+			return new UsernamePasswordAuthenticationToken(email, password, List.of(new SimpleGrantedAuthority(role.name())));
 		} else {
 			throw new BadCredentialsException("Invalid password!");
 		}
