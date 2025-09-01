@@ -2,16 +2,18 @@
 import { createRouter, createWebHistory, RouteRecordRaw, Router } from 'vue-router';
 import LoginForm from '../pages/LoginForm.vue';
 import HelloWorld from "../components/HelloWorld.vue";
+import CreateAccountForm from "../pages/CreateAccountForm.vue";
 // import CreateAccountForm from '../pages/login/CreateAccountForm.vue';
 // import ForgetPasswordForm from '../pages/login/ForgetPasswordForm.vue';
 // import ResetPasswordForm from '../pages/login/ResetPasswordForm.vue';
 
 
 const routes: RouteRecordRaw[] = [
-    // paths that can only be accessed if logged out
+  { path: '/', redirect: '/login', meta: { requiresLogout: true }},
   { path: '/login', component: LoginForm, meta: { requiresLogout: true }},
   { path: '/login?logout=true', component: LoginForm, meta: { requiresLogout: true }},
   { path: '/hello', component: HelloWorld },
+  { path: '/createAccount', component: CreateAccountForm }
 
 
     // paths that don't need to be protected
