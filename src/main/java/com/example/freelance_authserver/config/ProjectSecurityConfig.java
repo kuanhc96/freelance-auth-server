@@ -108,8 +108,22 @@ public class ProjectSecurityConfig {
 		http
 				.authorizeHttpRequests((authorize) ->
 						authorize
-								.requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-								.anyRequest().authenticated()
+								.requestMatchers(
+										"/",
+										"/index.html",
+										"/assets/**",
+										"/*.js",
+										"/*.css",
+										"/.ico",
+										"/*.png",
+										"/*.svg",
+										"/login",
+										"/css/**",
+										"/js/**",
+										"/images/**"
+								).permitAll()
+								.requestMatchers("/api/**").authenticated()
+								.anyRequest().permitAll()
 				)
 				.cors(corsConfig ->
 						corsConfig.configurationSource(new CorsConfigurationSource() {
