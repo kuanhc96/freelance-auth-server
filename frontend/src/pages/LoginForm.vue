@@ -1,7 +1,6 @@
 <template>
     <section>
-<!--        <BaseCard card-title="Login" @refresh="refresh">-->
-        <BaseCard card-title="Login">
+        <BaseCard class="login-form" card-title="Login">
             <form @submit.prevent="submitForm">
                 <div class="mb-3">
                     <label class="form-label" for="email">User Email </label>
@@ -61,28 +60,29 @@
 
 <script lang="ts">
 import BaseCard from "../components/ui/BaseCard.vue";
-// import {useLoginStore} from "@/store/login";
 import {onMounted, Ref, ref} from "vue";
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 import {LoginRequest} from "../dto/request/loginRequest";
-// import Toast from 'bootstrap/js/dist/toast';
+import Toast from 'bootstrap/js/dist/toast';
+import {useLoginStore} from "../store/login";
 
 export default {
     components: {
         BaseCard
     },
     setup() {
-        // const loginStore = useLoginStore();
+        const loginStore = useLoginStore();
         const router = useRouter();
         const email: Ref<string> = ref('');
         const password: Ref<string> = ref('');
         const selectedRole: Ref<string> = ref('STUDENT');
 
-        // function refresh() {
-        //     email.value = '';
-        //     password.value = '';
-        //     router.replace("/login");
-        // }
+        function refresh() {
+            email.value = '';
+            password.value = '';
+            selectedRole.value = 'STUDENT';
+            router.replace("/login");
+        }
 
         async function submitForm() {
             const loginRequest: LoginRequest = {
@@ -90,26 +90,21 @@ export default {
                 password: password.value,
                 role: selectedRole.value
             }
-            console.log('loginRequest', loginRequest);
-            // await loginStore.login(loginRequest);
-        }
-
-        function closeAutoLogout() {
-            // loginStore.closeAutoLogout();
+            await loginStore.login(loginRequest);
         }
 
         onMounted(() => {
-            // const toast: Element | null = document.querySelector('#myToast');
-            // if (loginStore.getDidAutoLogout) {
-            //     const toastBootstrap = Toast.getOrCreateInstance(toast!);
-            //     toastBootstrap.show();
-            //     const toastTrigger = document.querySelector('#toastBtn');
-            //     toastTrigger?.addEventListener('click', () => {
-            //         toastBootstrap.hide();
-            //         loginStore.closeAutoLogout();
-            //     })
-            //     loginStore.closeAutoLogout();
-            // }
+            const route = useRoute();
+            const autoLoggedOut = route.query.autoLogOut;
+            const toast: Element | null = document.querySelector('#myToast');
+            if (autoLoggedOut !== undefined) {
+                const toastBootstrap = Toast.getOrCreateInstance(toast!);
+                toastBootstrap.show();
+                const toastTrigger = document.querySelector('#toastBtn');
+                toastTrigger?.addEventListener('click', () => {
+                    toastBootstrap.hide();
+                })
+            }
 
         })
 
@@ -117,8 +112,7 @@ export default {
             email,
             password,
             selectedRole,
-            // closeAutoLogout,
-            // refresh,
+            refresh,
             submitForm
         }
     }
