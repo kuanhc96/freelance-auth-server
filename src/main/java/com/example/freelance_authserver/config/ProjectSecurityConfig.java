@@ -120,7 +120,8 @@ public class ProjectSecurityConfig {
 										"/login",
 										"/css/**",
 										"/js/**",
-										"/images/**"
+										"/images/**",
+										"/actuator/**"
 								).permitAll()
 								.requestMatchers("/api/**").authenticated()
 								.anyRequest().permitAll()
