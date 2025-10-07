@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import {LoginRequest} from "../../dto/request/loginRequest";
-import {LoginResponse} from "../../dto/response/loginResponse";
 import router from "../../router/router";
 import Cookies from "js-cookie";
 
