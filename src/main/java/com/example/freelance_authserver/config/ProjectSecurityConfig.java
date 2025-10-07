@@ -142,6 +142,9 @@ public class ProjectSecurityConfig {
 				)
 				.csrf(csrf -> csrf
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+						.ignoringRequestMatchers(
+								"/actuator/**"
+						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
