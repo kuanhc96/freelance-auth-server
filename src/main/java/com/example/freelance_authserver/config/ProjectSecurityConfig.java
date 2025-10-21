@@ -121,7 +121,8 @@ public class ProjectSecurityConfig {
 										"/css/**",
 										"/js/**",
 										"/images/**",
-										"/actuator/**"
+										"/actuator/**",
+										"/user/create"
 								).permitAll()
 								.requestMatchers("/api/**").authenticated()
 								.anyRequest().permitAll()
@@ -143,7 +144,8 @@ public class ProjectSecurityConfig {
 				.csrf(csrf -> csrf
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
 						.ignoringRequestMatchers(
-								"/actuator/**"
+								"/actuator/**",
+										"/user/create"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
