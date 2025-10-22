@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: freelance-authserver
+  config:
+    import: "configserver:http://configserver:8071/"
