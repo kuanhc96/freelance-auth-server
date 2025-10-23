@@ -2,7 +2,6 @@ package com.example.freelance_authserver.config;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.Principal;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
@@ -22,11 +21,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -46,7 +41,6 @@ import org.springframework.security.oauth2.server.authorization.settings.OAuth2T
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -58,10 +52,10 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
 import com.example.freelance_authserver.enums.UserRole;
 import com.example.freelance_authserver.filter.CsrfCookieFilter;
-import com.example.freelance_authserver.service.UserDetailsService;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -122,7 +116,9 @@ public class ProjectSecurityConfig {
 										"/js/**",
 										"/images/**",
 										"/actuator/**",
-										"/user/create"
+										"/user/create",
+										"/user/delete/**"
+
 								).permitAll()
 								.requestMatchers("/api/**").authenticated()
 								.anyRequest().permitAll()
@@ -145,7 +141,8 @@ public class ProjectSecurityConfig {
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
 						.ignoringRequestMatchers(
 								"/actuator/**",
-										"/user/create"
+										"/user/create",
+										"/user/delete/**"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
@@ -256,8 +253,8 @@ public class ProjectSecurityConfig {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
-		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userDetailsService, passwordEncoder);
+	public AuthenticationManager authenticationManager(UserManagementServerClient userManagementServerClient) {
+		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userManagementServerClient);
 		ProviderManager providerManager = new ProviderManager(provider);
 		providerManager.setEraseCredentialsAfterAuthentication(false);
 		return providerManager;
