@@ -68,6 +68,20 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <version>4.3.0</version>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -131,6 +145,16 @@
 					</excludes>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>3.4.6</version>
+                <configuration>
+                    <to>
+                        <image>kuanskchen344/auth-test:garmin</image>
+                    </to>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 
