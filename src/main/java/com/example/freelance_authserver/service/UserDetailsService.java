@@ -64,4 +64,8 @@ public class UserDetailsService {
 		return UserTranslator.toDto(userEntity);
 
 	}
+
+	public void deleteUser(String userGUID) {
+		userRepository.deleteUserByUserGUID(userGUID);
+	}
 }

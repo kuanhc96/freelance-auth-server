@@ -27,6 +27,14 @@ public class UserRepository {
 			"VALUES (:user_guid, :email, :password, :role, :status, :name, :gender, :description, :birthday, :profile_picture," +
 			" :created_date, :updated_date)";
 
+	private String deleteUserByUserGUID = "DELETE FROM users WHERE user_guid = :user_guid";
+
+	public void deleteUserByUserGUID(String userGUID) {
+		MapSqlParameterSource params = new MapSqlParameterSource();
+		params.addValue(UserMapper.USER_GUID, userGUID);
+		jdbcTemplate.update(deleteUserByUserGUID, params);
+	}
+
 	public void insertUser(UserEntity user) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		params.addValue(UserMapper.USER_GUID, user.getUserGUID());

@@ -27,6 +27,7 @@ public class UserTranslator {
 				.gender(entity.getGender())
 				.description(entity.getDescription())
 				.birthday(entity.getBirthday())
+				.role(entity.getRole())
 				.build();
 	}
 }
