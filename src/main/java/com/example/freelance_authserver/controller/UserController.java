@@ -1,46 +1,36 @@
 package com.example.freelance_authserver.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
+import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.CreateUserRequest;
 import com.example.freelance_authserver.entities.CreateUserResponse;
-import com.example.freelance_authserver.service.UserDetailsService;
 
 @RestController
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-	private final UserDetailsService userDetailsService;
+	private final UserManagementServerClient userManagementServerClient;
 
-	@PostMapping("/user/create")
+	@PostMapping("/create")
+//	@PreAuthorize("INTEGRATION_TEST")
 	public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest request) {
-		if (!request.getEmail().contains("@")) {
-			throw new IllegalArgumentException("Invalid email format");
-		}
-		if (StringUtils.isBlank(request.getPassword())) {
-			throw new IllegalArgumentException("Password cannot be empty");
-		}
-		if (StringUtils.isBlank(request.getName())) {
-			throw new IllegalArgumentException("Name cannot be empty");
-		}
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(userDetailsService.createUser(request));
+		return userManagementServerClient.createUser(request);
 	}
 
-	@DeleteMapping("/user/delete/{userGUID}")
+	@DeleteMapping("/delete/{userGUID}")
+//	@PreAuthorize("INTEGRATION_TEST")
 	public ResponseEntity<Void> deleteUser(@PathVariable String userGUID) {
-		if (StringUtils.isBlank(userGUID)) {
-			throw new IllegalArgumentException("User GUID cannot be null or empty");
-		}
-		userDetailsService.deleteUser(userGUID);
+		userManagementServerClient.deleteUser(userGUID);
 		return ResponseEntity.noContent().build();
 	}
 }
