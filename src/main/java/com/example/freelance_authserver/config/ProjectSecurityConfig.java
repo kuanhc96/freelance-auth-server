@@ -5,31 +5,20 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -39,23 +28,10 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
-import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
-import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import com.example.freelance_authserver.client.UserManagementServerClient;
-import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
-import com.example.freelance_authserver.enums.UserRole;
-import com.example.freelance_authserver.filter.CsrfCookieFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -96,64 +72,15 @@ public class ProjectSecurityConfig {
 
 	@Bean
 	@Order(2)
-	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, FreelanceAuthDetailsSource detailsSource)
+	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
 			throws Exception {
-		CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
 		http
-				.authorizeHttpRequests((authorize) ->
-						authorize
-								.requestMatchers(
-										"/",
-										"/index.html",
-										"/assets/**",
-										"/*.js",
-										"/*.css",
-										"/.ico",
-										"/*.png",
-										"/*.svg",
-										"/login",
-										"/css/**",
-										"/js/**",
-										"/images/**",
-										"/actuator/**",
-										"/user/create",
-										"/user/delete/**",
-										"/oauth2/token"
-
-								).permitAll()
-								.requestMatchers("/api/**").authenticated()
-								.anyRequest().permitAll()
+				.authorizeHttpRequests((authorize) -> authorize
+						.anyRequest().authenticated()
 				)
-				.cors(corsConfig ->
-						corsConfig.configurationSource(new CorsConfigurationSource() {
-					@Override
-					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-						CorsConfiguration config = new CorsConfiguration();
-						config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
-						config.setAllowedMethods(Collections.singletonList("*"));
-						config.setAllowCredentials(true);
-						config.setAllowedHeaders(Collections.singletonList("*"));
-						config.setMaxAge(3600L);
-						return config;
-					}
-				})
-				)
-				.csrf(csrf -> csrf
-						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-						.ignoringRequestMatchers(
-								"/actuator/**",
-										"/user/create",
-										"/user/delete/**"
-						)
-						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				)
-				.formLogin(flc -> flc
-						.loginPage("/login")
-//						.defaultSuccessUrl("/")
-								.authenticationDetailsSource(detailsSource)
-//						.permitAll()
-				);
-		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
+				// Form login handles the redirect to the login page from the
+				// authorization server filter chain
+				.formLogin(Customizer.withDefaults());
 
 		return http.build();
 	}
@@ -274,42 +201,4 @@ public class ProjectSecurityConfig {
 		return AuthorizationServerSettings.builder().build();
 	}
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-	}
-
-	@Bean
-	public AuthenticationManager authenticationManager(UserManagementServerClient userManagementServerClient) {
-		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userManagementServerClient);
-		ProviderManager providerManager = new ProviderManager(provider);
-		providerManager.setEraseCredentialsAfterAuthentication(false);
-		return providerManager;
-	}
-
-	@Bean
-	public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
-		return (context) -> {
-			var principal = context.getPrincipal();
-			OAuth2TokenType tokenType = context.getTokenType();
-			if (tokenType.equals(OAuth2TokenType.ACCESS_TOKEN)) {
-				Set<String> roles = principal.getAuthorities().stream()
-						.map(role -> "ROLE_" + role.getAuthority())
-						.collect(Collectors.toSet());
-				context.getClaims().claims((claims) -> {
-					claims.put("roles", roles);
-				});
-			} else if (tokenType.equals(new OAuth2TokenType(OidcParameterNames.ID_TOKEN))) {
-				UserRole role = principal.getAuthorities().stream()
-						.map(GrantedAuthority::getAuthority)
-						.map(UserRole::valueOf)
-						.findFirst()
-						.orElseThrow(() -> new BadCredentialsException("Invalid role")); // Default role if not found
-				context.getClaims().claims((claims) -> {
-					claims.put("role", role);
-				});
-
-			}
-		};
-	}
 }
