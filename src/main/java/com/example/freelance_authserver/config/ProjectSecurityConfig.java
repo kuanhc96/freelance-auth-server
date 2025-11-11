@@ -80,7 +80,7 @@ public class ProjectSecurityConfig {
 				)
 				// Form login handles the redirect to the login page from the
 				// authorization server filter chain
-				.formLogin(Customizer.withDefaults());
+				.formLogin(form -> form.loginPage("http://localhost:5173/login"));
 
 		return http.build();
 	}
@@ -88,7 +88,7 @@ public class ProjectSecurityConfig {
 	@Bean
 	public RegisteredClientRepository registeredClientRepository() {
 		RegisteredClient itClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("freelance-integration-test-client")
+				.clientId("resource-server-integration-test-client")
 				.clientSecret("{noop}secret")
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
@@ -113,13 +113,25 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		RegisteredClient authServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("auth-server-client")
-				.clientSecret("{noop}authServerSecret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+		RegisteredClient authenticationServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("authentication-server-client")
+				.clientSecret("{noop}authenticationServerSecret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 //				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
 				.scope("USER_MANAGEMENT_SERVER")
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.build())
+				.build();
+
+		RegisteredClient gatewayServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("gateway-server-client")
+				.clientSecret("{noop}gatewayServerSecret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of("USER_MANAGEMENT_SERVER", "RESOURCE_SERVER", "AUTHENTICATION_SERVER")))
 				.tokenSettings(TokenSettings.builder()
 						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
 						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
@@ -162,7 +174,7 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient);
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authenticationServerClient, gatewayServerClient);
 	}
 
 	@Bean
