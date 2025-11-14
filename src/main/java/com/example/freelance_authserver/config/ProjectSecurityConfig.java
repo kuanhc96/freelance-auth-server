@@ -246,7 +246,7 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient);
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient, gatewayServerClient);
 	}
 
 	@Bean
