@@ -189,7 +189,7 @@ public class ProjectSecurityConfig {
 		RegisteredClient authServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("auth-server-client")
 				.clientSecret("{noop}authServerSecret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 //				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
 				.scope("USER_MANAGEMENT_SERVER")
