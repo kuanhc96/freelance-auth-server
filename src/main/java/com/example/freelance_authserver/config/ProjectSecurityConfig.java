@@ -234,6 +234,17 @@ public class ProjectSecurityConfig {
 						.reuseRefreshTokens(false)
 						.build())
 				.build();
+		RegisteredClient gatewayServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("gateway-server-client")
+				.clientSecret("{noop}gatewayServerSecret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of("USER_MANAGEMENT_SERVER", "RESOURCE_SERVER", "AUTHENTICATION_SERVER")))
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.build())
+				.build();
 
 		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient);
 	}
