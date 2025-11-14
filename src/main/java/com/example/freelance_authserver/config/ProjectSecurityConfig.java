@@ -206,7 +206,7 @@ public class ProjectSecurityConfig {
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("http://localhost:8080/callback")
+				.redirectUri("https://app.insomnia.rest/oauth/redirect")
 				.scopes(scopeConfig -> scopeConfig.addAll(List.of(OidcScopes.OPENID, "FREELANCE_FE")))
 				.tokenSettings(TokenSettings.builder()
 						.accessTokenTimeToLive(Duration.ofMinutes(10))
