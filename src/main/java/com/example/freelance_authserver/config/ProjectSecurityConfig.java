@@ -149,7 +149,7 @@ public class ProjectSecurityConfig {
 				)
 				.formLogin(flc -> flc
 						.loginPage("/login")
-//						.defaultSuccessUrl("/")
+						.loginProcessingUrl("/login")
 								.authenticationDetailsSource(detailsSource)
 //						.permitAll()
 				);
