@@ -9,12 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.freelance_authserver.config.OAuth2FeignConfig;
 import com.example.freelance_authserver.entities.CreateUserRequest;
 import com.example.freelance_authserver.entities.CreateUserResponse;
 import com.example.freelance_authserver.entities.GetUserResponse;
 import com.example.freelance_authserver.enums.UserRole;
 
-@FeignClient("freelance-user-management-server")
+@FeignClient(name = "freelance-user-management-server", configuration = OAuth2FeignConfig.class)
 public interface UserManagementServerClient {
 	@PostMapping(value = "/user/create", consumes = "application/json")
 	ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest request);
@@ -25,6 +26,6 @@ public interface UserManagementServerClient {
 	@GetMapping(value = "/user")
 	ResponseEntity<GetUserResponse> getUserByEmailAndRole(@RequestParam String email, @RequestParam UserRole role);
 
-	@PostMapping(value = "/user/authenticate", consumes = "application/json")
+	@PostMapping(value = "/user/authenticate", consumes = "application/x-www-form-urlencoded")
 	ResponseEntity<Boolean> authenticate(@RequestParam String email, @RequestParam UserRole role, @RequestParam String password);
 }
