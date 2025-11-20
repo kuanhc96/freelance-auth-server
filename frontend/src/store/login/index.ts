@@ -61,7 +61,7 @@ export const useLoginStore = defineStore('login', {
                     // timer = setTimeout(async () => {
                     //     await this.autoLogout();
                     // }, data.expirationTimestamp - new Date().getTime());
-                    await router.replace('/hello');
+                    // await router.replace('/hello');
                 // }
             } else {
                 console.log(response);

@@ -1,14 +1,14 @@
 <template>
     <section>
         <BaseCard class="login-form" card-title="Login">
-            <form @submit.prevent="submitForm">
+            <form class="login-form" action="/login" method="post">
                 <div class="mb-3">
                     <label class="form-label" for="email">User Email </label>
-                    <input class="form-control" type="email" id="email" v-model="email" required/>
+                    <input class="form-control" name="email" type="email" id="email" v-model="email" required/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="password">Password </label>
-                    <input class="form-control" type="password" id="password" v-model="password" required/>
+                    <input class="form-control" name="password" type="password" id="password" v-model="password" required/>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Login as...</label>
@@ -16,6 +16,7 @@
                         <input
                             class="form-check-input "
                             type="radio"
+                            name="role"
                             id="student"
                             value="STUDENT"
                             v-model="selectedRole"
@@ -27,6 +28,7 @@
                         <input
                             class="form-check-input"
                             type="radio"
+                            name="role"
                             id="instructor"
                             value="INSTRUCTOR"
                             v-model="selectedRole"
@@ -85,12 +87,12 @@ export default {
         }
 
         async function submitForm() {
-            const loginRequest: LoginRequest = {
-                email: email.value,
-                password: password.value,
-                role: selectedRole.value
-            }
-            await loginStore.login(loginRequest);
+            // const loginRequest: LoginRequest = {
+            //     email: email.value,
+            //     password: password.value,
+            //     role: selectedRole.value
+            // }
+            // await loginStore.login(loginRequest);
         }
 
         onMounted(() => {

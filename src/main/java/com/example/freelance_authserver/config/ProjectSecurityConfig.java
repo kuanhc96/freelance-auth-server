@@ -43,6 +43,7 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -143,14 +144,17 @@ public class ProjectSecurityConfig {
 						.ignoringRequestMatchers(
 								"/actuator/**",
 										"/user/create",
-										"/user/delete/**"
+										"/user/delete/**",
+								"/login"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
 						.loginPage("/login")
 						.loginProcessingUrl("/login")
+								.usernameParameter("email")
 								.authenticationDetailsSource(detailsSource)
+								.successHandler(new CustomAuthenticationSuccessHandler())
 //						.permitAll()
 				);
 		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
@@ -206,7 +210,7 @@ public class ProjectSecurityConfig {
 				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("https://app.insomnia.rest/oauth/redirect")
+				.redirectUri("http://localhost:8080/callback")
 				.scopes(scopeConfig -> scopeConfig.addAll(List.of(OidcScopes.OPENID, "FREELANCE_FE")))
 				.tokenSettings(TokenSettings.builder()
 						.accessTokenTimeToLive(Duration.ofMinutes(10))
