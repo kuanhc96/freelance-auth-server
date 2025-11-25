@@ -142,9 +142,9 @@ public class ProjectSecurityConfig {
 				.csrf(csrf -> csrf
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
 						.ignoringRequestMatchers(
-								"/actuator/**",
-										"/user/create",
-										"/user/delete/**",
+						"/actuator/**",
+								"/user/create",
+								"/user/delete/**",
 								"/login"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -152,10 +152,9 @@ public class ProjectSecurityConfig {
 				.formLogin(flc -> flc
 						.loginPage("/login")
 						.loginProcessingUrl("/login")
-								.usernameParameter("email")
-								.authenticationDetailsSource(detailsSource)
-								.successHandler(new CustomAuthenticationSuccessHandler())
-//						.permitAll()
+						.usernameParameter("email")
+						.authenticationDetailsSource(detailsSource)
+						.successHandler(new CustomAuthenticationSuccessHandler())
 				);
 		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 

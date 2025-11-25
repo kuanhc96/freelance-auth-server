@@ -64,7 +64,6 @@
 import BaseCard from "../components/ui/BaseCard.vue";
 import {onMounted, Ref, ref} from "vue";
 import {useRouter, useRoute} from 'vue-router';
-import {LoginRequest} from "../dto/request/loginRequest";
 import Toast from 'bootstrap/js/dist/toast';
 import {useLoginStore} from "../store/login";
 
@@ -84,15 +83,6 @@ export default {
             password.value = '';
             selectedRole.value = 'STUDENT';
             router.replace("/login");
-        }
-
-        async function submitForm() {
-            // const loginRequest: LoginRequest = {
-            //     email: email.value,
-            //     password: password.value,
-            //     role: selectedRole.value
-            // }
-            // await loginStore.login(loginRequest);
         }
 
         onMounted(() => {
@@ -115,7 +105,6 @@ export default {
             password,
             selectedRole,
             refresh,
-            submitForm
         }
     }
 }
