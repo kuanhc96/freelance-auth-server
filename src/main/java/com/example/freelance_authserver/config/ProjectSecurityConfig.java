@@ -87,7 +87,7 @@ public class ProjectSecurityConfig {
 				// authorization endpoint
 				.exceptionHandling((exceptions) -> exceptions
 						.defaultAuthenticationEntryPointFor(
-								new LoginUrlAuthenticationEntryPoint("/login"),
+								new LoginUrlAuthenticationEntryPoint("http://localhost:8080/login"),
 								new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 						)
 				);
@@ -130,7 +130,7 @@ public class ProjectSecurityConfig {
 					@Override
 					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 						CorsConfiguration config = new CorsConfiguration();
-						config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+						config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:8072"));
 						config.setAllowedMethods(Collections.singletonList("*"));
 						config.setAllowCredentials(true);
 						config.setAllowedHeaders(Collections.singletonList("*"));
@@ -150,7 +150,7 @@ public class ProjectSecurityConfig {
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
-						.loginPage("/login")
+						.loginPage("http://localhost:8080/login")
 						.loginProcessingUrl("/login")
 						.usernameParameter("email")
 						.authenticationDetailsSource(detailsSource)
