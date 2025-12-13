@@ -145,7 +145,8 @@ public class ProjectSecurityConfig {
 						"/actuator/**",
 								"/user/create",
 								"/user/delete/**",
-								"/login"
+								"/login",
+								"/authState/verify"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
