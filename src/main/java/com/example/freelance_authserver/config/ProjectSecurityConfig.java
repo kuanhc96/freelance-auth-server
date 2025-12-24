@@ -151,7 +151,7 @@ public class ProjectSecurityConfig {
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
-						.loginPage("http://localhost:8080/login")
+						.loginPage("/login")
 						.loginProcessingUrl("/login")
 						.usernameParameter("email")
 						.authenticationDetailsSource(detailsSource)
