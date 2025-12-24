@@ -43,6 +43,7 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -86,7 +87,7 @@ public class ProjectSecurityConfig {
 				// authorization endpoint
 				.exceptionHandling((exceptions) -> exceptions
 						.defaultAuthenticationEntryPointFor(
-								new LoginUrlAuthenticationEntryPoint("/login"),
+								new LoginUrlAuthenticationEntryPoint("http://localhost:8080/login"),
 								new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
 						)
 				);
@@ -129,7 +130,7 @@ public class ProjectSecurityConfig {
 					@Override
 					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 						CorsConfiguration config = new CorsConfiguration();
-						config.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+						config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:8072"));
 						config.setAllowedMethods(Collections.singletonList("*"));
 						config.setAllowCredentials(true);
 						config.setAllowedHeaders(Collections.singletonList("*"));
@@ -141,17 +142,20 @@ public class ProjectSecurityConfig {
 				.csrf(csrf -> csrf
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
 						.ignoringRequestMatchers(
-								"/actuator/**",
-										"/user/create",
-										"/user/delete/**"
+						"/actuator/**",
+								"/user/create",
+								"/user/delete/**",
+								"/login",
+								"/authState/verify"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
 				.formLogin(flc -> flc
 						.loginPage("/login")
-//						.defaultSuccessUrl("/")
-								.authenticationDetailsSource(detailsSource)
-//						.permitAll()
+						.loginProcessingUrl("/login")
+						.usernameParameter("email")
+						.authenticationDetailsSource(detailsSource)
+						.successHandler(new CustomAuthenticationSuccessHandler())
 				);
 		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
@@ -189,7 +193,7 @@ public class ProjectSecurityConfig {
 		RegisteredClient authServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("auth-server-client")
 				.clientSecret("{noop}authServerSecret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
 				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
 //				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
 				.scope("USER_MANAGEMENT_SERVER")
@@ -234,8 +238,19 @@ public class ProjectSecurityConfig {
 						.reuseRefreshTokens(false)
 						.build())
 				.build();
+		RegisteredClient gatewayServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("gateway-server-client")
+				.clientSecret("{noop}gatewayServerSecret")
+				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
+				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+				.scopes(scopeConfig -> scopeConfig.addAll(List.of("USER_MANAGEMENT_SERVER", "RESOURCE_SERVER", "AUTHENTICATION_SERVER")))
+				.tokenSettings(TokenSettings.builder()
+						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
+						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+						.build())
+				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient);
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient, gatewayServerClient);
 	}
 
 	@Bean
