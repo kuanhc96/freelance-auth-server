@@ -27,5 +27,5 @@ public interface UserManagementServerClient {
 	ResponseEntity<GetUserResponse> getUserByEmailAndRole(@RequestParam String email, @RequestParam UserRole role);
 
 	@PostMapping(value = "/user/authenticate", consumes = "application/x-www-form-urlencoded")
-	ResponseEntity<Boolean> authenticate(@RequestParam String email, @RequestParam UserRole role, @RequestParam String password);
+	ResponseEntity<String> authenticate(@RequestParam String email, @RequestParam UserRole role, @RequestParam String password);
 }

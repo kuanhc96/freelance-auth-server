@@ -7,6 +7,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -320,8 +321,11 @@ public class ProjectSecurityConfig {
 						.map(UserRole::valueOf)
 						.findFirst()
 						.orElseThrow(() -> new BadCredentialsException("Invalid role")); // Default role if not found
+				Map<String, String> details = (Map<String, String>) principal.getDetails();
+				String userGUID = details.get("userGUID");
 				context.getClaims().claims((claims) -> {
 					claims.put("role", role);
+					claims.put("userGUID", userGUID);
 				});
 
 			}

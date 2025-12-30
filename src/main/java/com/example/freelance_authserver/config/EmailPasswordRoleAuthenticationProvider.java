@@ -1,7 +1,9 @@
 package com.example.freelance_authserver.config;
 
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,9 +30,12 @@ public class EmailPasswordRoleAuthenticationProvider implements AuthenticationPr
 		String password = authentication.getCredentials().toString();
 		FreelanceWebAuthenticationDetails details = (FreelanceWebAuthenticationDetails) authentication.getDetails();
 		UserRole role = details.getRole();
-		ResponseEntity<Boolean> authenticationResponse = userManagementServerClient.authenticate(email, role, password);
-		if (authenticationResponse.getBody() != null && authenticationResponse.getBody()) {
-			return new UsernamePasswordAuthenticationToken(email, password, List.of(new SimpleGrantedAuthority(role.name())));
+		ResponseEntity<String> authenticationResponse = userManagementServerClient.authenticate(email, role, password);
+		String userGUID = authenticationResponse.getBody();
+		if (StringUtils.isNotBlank(userGUID)) {
+			UsernamePasswordAuthenticationToken principal = new UsernamePasswordAuthenticationToken(email, password, List.of(new SimpleGrantedAuthority(role.name())));
+			principal.setDetails(Map.of("userGUID", userGUID));
+			return principal;
 		} else {
 			throw new BadCredentialsException("Invalid password!");
 		}
