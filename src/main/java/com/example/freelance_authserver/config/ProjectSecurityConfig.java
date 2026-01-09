@@ -123,7 +123,7 @@ public class ProjectSecurityConfig {
 										"/oauth2/token"
 
 								).permitAll()
-								.requestMatchers("/api/**").authenticated()
+//								.requestMatchers("/api/**").authenticated()
 								.anyRequest().permitAll()
 				)
 				.cors(corsConfig ->
@@ -147,7 +147,7 @@ public class ProjectSecurityConfig {
 								"/user/create",
 								"/user/delete/**",
 								"/login",
-								"/authState/verify"
+								"/api/verify/state"
 						)
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				)
