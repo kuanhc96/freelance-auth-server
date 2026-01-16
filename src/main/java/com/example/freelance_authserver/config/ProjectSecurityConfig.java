@@ -5,7 +5,6 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,20 +43,11 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
 import com.example.freelance_authserver.enums.UserRole;
-import com.example.freelance_authserver.filter.CsrfCookieFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -100,7 +90,6 @@ public class ProjectSecurityConfig {
 	@Order(2)
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, FreelanceAuthDetailsSource detailsSource)
 			throws Exception {
-		CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
 		http
 				.authorizeHttpRequests((authorize) ->
 						authorize
@@ -120,37 +109,13 @@ public class ProjectSecurityConfig {
 										"/actuator/**",
 										"/user/create",
 										"/user/delete/**",
-										"/oauth2/token"
+										"/api/oauth2/token"
 
 								).permitAll()
-								.requestMatchers("/api/**").authenticated()
 								.anyRequest().permitAll()
 				)
-				.cors(corsConfig ->
-						corsConfig.configurationSource(new CorsConfigurationSource() {
-					@Override
-					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-						CorsConfiguration config = new CorsConfiguration();
-						config.setAllowedOrigins(List.of("http://localhost:8080", "http://localhost:8072"));
-						config.setAllowedMethods(Collections.singletonList("*"));
-						config.setAllowCredentials(true);
-						config.setAllowedHeaders(Collections.singletonList("*"));
-						config.setMaxAge(3600L);
-						return config;
-					}
-				})
-				)
-				.csrf(csrf -> csrf
-						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-						.ignoringRequestMatchers(
-						"/actuator/**",
-								"/user/create",
-								"/user/delete/**",
-								"/login",
-								"/authState/verify"
-						)
-						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-				)
+				.cors(corsConfig -> corsConfig.disable())
+				.csrf(csrf -> csrf.disable())
 				.formLogin(flc -> flc
 						.loginPage("/login")
 						.loginProcessingUrl("/login")
@@ -158,7 +123,6 @@ public class ProjectSecurityConfig {
 						.authenticationDetailsSource(detailsSource)
 						.successHandler(new CustomAuthenticationSuccessHandler())
 				);
-		http.addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class);
 
 		return http.build();
 	}

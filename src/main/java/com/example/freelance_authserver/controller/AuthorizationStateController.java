@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.freelance_authserver.config.AuthorizationStateDecoder;
 
 @RestController
-@RequestMapping("/authState")
+@RequestMapping("/api/verify")
 public class AuthorizationStateController {
 
-	@PostMapping("/verify")
+	@PostMapping("/state")
 	public ResponseEntity<Boolean> verifyAuthorizationState(@RequestBody String state) {
 		return ResponseEntity.ok(AuthorizationStateDecoder.verifySignature(state));
 	}

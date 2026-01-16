@@ -17,15 +17,15 @@ import com.example.freelance_authserver.enums.UserRole;
 
 @FeignClient(name = "freelance-user-management-server", configuration = OAuth2FeignConfig.class)
 public interface UserManagementServerClient {
-	@PostMapping(value = "/user/create", consumes = "application/json")
+	@PostMapping(value = "/api/users/create", consumes = "application/json")
 	ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest request);
 
-	@DeleteMapping(value = "/user/delete/{userGUID}")
+	@DeleteMapping(value = "/api/users/delete/{userGUID}")
 	ResponseEntity<Void> deleteUser(@PathVariable String userGUID);
 
-	@GetMapping(value = "/user")
+	@GetMapping(value = "/api/users")
 	ResponseEntity<GetUserResponse> getUserByEmailAndRole(@RequestParam String email, @RequestParam UserRole role);
 
-	@PostMapping(value = "/user/authenticate", consumes = "application/x-www-form-urlencoded")
+	@PostMapping(value = "/api/users/authenticate", consumes = "application/x-www-form-urlencoded")
 	ResponseEntity<String> authenticate(@RequestParam String email, @RequestParam UserRole role, @RequestParam String password);
 }
