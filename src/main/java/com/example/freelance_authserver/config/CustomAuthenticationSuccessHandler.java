@@ -38,7 +38,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 				.queryParam("client_id", "fe-client")
 				.queryParam("redirect_uri", "http://localhost:8080/callback")
 				.queryParam("response_type", "code")
-				.queryParam("scope", "openid")
+				.queryParam("scope", "openid FREELANCE_FE")
 				.queryParam("state", state)
 				.build().toUri();
 
