@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +18,6 @@ import com.example.freelance_authserver.entities.UserCredentialsEntity;
 import com.example.freelance_authserver.repository.UserCredentialsRepository;
 import lombok.RequiredArgsConstructor;
 
-import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.FreelanceWebAuthenticationDetails;
 import com.example.freelance_authserver.enums.UserRole;
 

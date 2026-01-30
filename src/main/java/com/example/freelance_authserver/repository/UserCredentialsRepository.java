@@ -18,7 +18,7 @@ public class UserCredentialsRepository {
     private final UserCredentialsMapper userCredentialsMapper;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private String getUserByEmailAndRole = "SELECT * FROM users WHERE email = :email AND role = :role";
+    private String getUserByEmailAndRole = "SELECT * FROM user_credentials WHERE email = :email AND role = :role";
 
     public Optional<UserCredentialsEntity> getUserByEmailAndRole(String email, UserRole role) {
         MapSqlParameterSource params = new MapSqlParameterSource();
