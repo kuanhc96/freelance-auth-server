@@ -155,19 +155,6 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		RegisteredClient authServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("auth-server-client")
-				.clientSecret("{noop}authServerSecret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
-				.scope("USER_MANAGEMENT_SERVER")
-				.tokenSettings(TokenSettings.builder()
-						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
-						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-						.build())
-				.build();
-
 		RegisteredClient feClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("fe-client")
 				.clientSecret("{noop}secret1")
@@ -215,7 +202,7 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient, gatewayServerClient);
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, gatewayServerClient);
 	}
 
 	@Bean
