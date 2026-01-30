@@ -48,6 +48,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
 import com.example.freelance_authserver.enums.UserRole;
+import com.example.freelance_authserver.repository.UserCredentialsRepository;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -247,8 +248,8 @@ public class ProjectSecurityConfig {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(UserManagementServerClient userManagementServerClient) {
-		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userManagementServerClient);
+	public AuthenticationManager authenticationManager(UserCredentialsRepository userCredentialsRepository, PasswordEncoder passwordEncoder) {
+		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userCredentialsRepository, passwordEncoder);
 		ProviderManager providerManager = new ProviderManager(provider);
 		providerManager.setEraseCredentialsAfterAuthentication(false);
 		return providerManager;
