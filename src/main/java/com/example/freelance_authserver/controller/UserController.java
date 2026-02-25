@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
-import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.CreateUserRequest;
 import com.example.freelance_authserver.entities.CreateUserResponse;
 
@@ -19,18 +18,18 @@ import com.example.freelance_authserver.entities.CreateUserResponse;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
-	private final UserManagementServerClient userManagementServerClient;
-
-	@PostMapping
-//	@PreAuthorize("INTEGRATION_TEST")
-	public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest request) {
-		return userManagementServerClient.createUser(request);
-	}
-
-	@DeleteMapping("/{userGUID}")
-//	@PreAuthorize("INTEGRATION_TEST")
-	public ResponseEntity<Void> deleteUser(@PathVariable String userGUID) {
-		userManagementServerClient.deleteUser(userGUID);
-		return ResponseEntity.noContent().build();
-	}
+//	private final UserManagementServerClient userManagementServerClient;
+//
+//	@PostMapping
+////	@PreAuthorize("INTEGRATION_TEST")
+//	public ResponseEntity<CreateUserResponse> createUser(@RequestBody CreateUserRequest request) {
+//		return userManagementServerClient.createUser(request);
+//	}
+//
+//	@DeleteMapping("/{userGUID}")
+////	@PreAuthorize("INTEGRATION_TEST")
+//	public ResponseEntity<Void> deleteUser(@PathVariable String userGUID) {
+//		userManagementServerClient.deleteUser(userGUID);
+//		return ResponseEntity.noContent().build();
+//	}
 }

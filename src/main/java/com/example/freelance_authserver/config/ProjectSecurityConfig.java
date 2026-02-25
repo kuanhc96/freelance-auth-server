@@ -45,9 +45,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
-import com.example.freelance_authserver.client.UserManagementServerClient;
 import com.example.freelance_authserver.entities.FreelanceAuthDetailsSource;
 import com.example.freelance_authserver.enums.UserRole;
+import com.example.freelance_authserver.repository.UserCredentialsRepository;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -155,19 +155,6 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		RegisteredClient authServerClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("auth-server-client")
-				.clientSecret("{noop}authServerSecret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//				.scopes(scopeConfig -> scopeConfig.addAll(List.of("INTEGRATION_TEST")))
-				.scope("USER_MANAGEMENT_SERVER")
-				.tokenSettings(TokenSettings.builder()
-						.accessTokenTimeToLive(java.time.Duration.ofMinutes(10))
-						.accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
-						.build())
-				.build();
-
 		RegisteredClient feClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("fe-client")
 				.clientSecret("{noop}secret1")
@@ -215,7 +202,7 @@ public class ProjectSecurityConfig {
 						.build())
 				.build();
 
-		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, authServerClient, gatewayServerClient);
+		return new InMemoryRegisteredClientRepository(itClient, feClient, pkceFeClient, resourceServerClient, gatewayServerClient);
 	}
 
 	@Bean
@@ -260,8 +247,8 @@ public class ProjectSecurityConfig {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(UserManagementServerClient userManagementServerClient) {
-		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userManagementServerClient);
+	public AuthenticationManager authenticationManager(UserCredentialsRepository userCredentialsRepository, PasswordEncoder passwordEncoder) {
+		EmailPasswordRoleAuthenticationProvider provider = new EmailPasswordRoleAuthenticationProvider(userCredentialsRepository, passwordEncoder);
 		ProviderManager providerManager = new ProviderManager(provider);
 		providerManager.setEraseCredentialsAfterAuthentication(false);
 		return providerManager;
